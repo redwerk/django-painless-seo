@@ -6,7 +6,7 @@ from django.utils.translation import get_language
 
 from painlessseo import settings
 from painlessseo.models import SeoMetadata
-from painlessseo.utils import get_formatted_metadata
+from painlessseo.utils import get_path_metadata
 from django import template
 
 register = Library()
@@ -47,7 +47,7 @@ def get_seo(context, **kwargs):
     path = context['request'].path
     lang_code = get_language()[:2]
 
-    metadata = get_formatted_metadata(path=path, lang_code=lang_code)
+    metadata = get_path_metadata(path=path, lang_code=lang_code, request=context['request'])
 
     result = {}
     for item in ['title', 'description']:

@@ -43,7 +43,8 @@ class SeoMetadata(models.Model):
     def save(self, force_insert=False, force_update=False, update_default=True, *args, **kwargs):
         if update_default:
             for seo_item in SEO_FIELDS:
-                if getattr(self, seo_item) != getattr(self, '__' + seo_item):
+                seo_value = getattr(self, seo_item, '')
+                if seo_value != getattr(self, '__' + seo_item, ''):
                     # SEO item has changed
                     self.is_default = False
 

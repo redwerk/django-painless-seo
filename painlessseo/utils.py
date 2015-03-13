@@ -4,7 +4,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import activate, get_language
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 from django.forms.models import model_to_dict
+from django.core.urlresolvers import resolve
 import re
 
 
@@ -37,7 +39,7 @@ def get_key_or_default(item, key, default_key):
         return item[default_key]
 
 
-def get_formatted_metadata(path, lang_code):
+def get_path_metadata(path, lang_code, request):
     # Find correct metadata
     result = {}
 
@@ -77,16 +79,43 @@ def get_formatted_metadata(path, lang_code):
                             raise ValueError(
                                 "Model %s does not have attribute %s" % (
                                     instance.__class__, match.strip()))
-
             # Final value
             result[item] = seo_item
 
     except SeoMetadata.DoesNotExist:
-        # SeoMetadata not found, fallback to general default
-        result = {
-            'title': get_for_lang(settings.FALLBACK_TITLE, lang_code),
-            'description': get_for_lang(settings.FALLBACK_DESCRIPTION, lang_code),
-        }
+        # SeoMetadata not found, try to find an alternative path
+        abstract_seometadatas = SeoMetadata.objects.filter(
+            lang_code=lang_code
+            ).filter(
+            Q(path__icontains="{") | Q(path__icontains="}")).order_by('-path')
+
+        first_match = None
+        for seometadata in list(abstract_seometadatas):
+            regex_path = re.sub(r'\{\d+\}', '(.*)', seometadata.path)
+            match = re.search(regex_path, path)
+            if match:
+                first_match = seometadata
+                break
+
+        if first_match:
+            # Format using parameters
+            for item in ['title', 'description']:
+                formatted_seo_item = getattr(first_match, item)
+                index = 0
+                for group in match.groups():
+                    group = re.sub('-', ' ', group).title()
+                    formatted_seo_item = re.sub(
+                        r'\{\s*%d\s*\}' % (index), group, formatted_seo_item)
+                    index += 1
+
+                result[item] = formatted_seo_item
+
+        else:
+            # Fallback to general default
+            result = {
+                'title': get_for_lang(settings.FALLBACK_TITLE, lang_code),
+                'description': get_for_lang(settings.FALLBACK_DESCRIPTION, lang_code),
+            }
 
     return result
 

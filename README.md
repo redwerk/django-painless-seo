@@ -33,8 +33,36 @@ PainlessSEO uses two configuration variables in order to define the default
 information that will be displayed if the URL has no SEO metadata related. You
 have to add them to your *settings.py*:
 
-    SEO_DEFAULT_TITLE = 'Lorem ipsum title'
-    SEO_DEFAULT_DESCRIPTION = 'Lorem ipsum description'
+    SEO_DEFAULT_TITLES = { 
+        'en': 'Lorem ipsum title english',
+        'es': 'Lorem ipsum title español',
+    }
+    SEO_DEFAULT_DESCRIPTIONS = { 
+        'en': 'Lorem ipsum description english',
+        'es': 'Lorem ipsum description español',
+    }
+
+If these variables are dictionaries, they are expected to contain the default metadata 
+for each language (identified using its 2 digits code). If an specific language is not 
+found, it will take the language defined in 'LANGUAGE_CODE' variable in settings. If 
+this variable is not set, 'en' is considered the default language.
+
+If these variabes are strings, they are expected to contain a generic fallback value
+that will be outputed for all languages.
+
+Furthermore, registered models can also contain a SEO_DEFAULT_TITLES and a 
+SEO_DEFAULT_DESCRIPTIONS variables that will prevail over the generic ones for 
+instances of this particular model.
+
+    SEO_DEFAULT_TITLES = { 
+        'en': 'Lorem ipsum model title english',
+        'es': 'Lorem ipsum model title español',
+    }
+    SEO_DEFAULT_DESCRIPTIONS = { 
+        'en': 'Lorem ipsum model description english',
+        'es': 'Lorem ipsum model description español',
+    }
+
 
 ### Registering Models
 
@@ -56,6 +84,17 @@ for each model:
 
 Now every time you save a model instance through the admin site, the SEO
 metadata will be updated automatically.
+
+In order to initialize the existing instances of a registered models, or when you
+need to add a new language for all the existing instances of a registered model, 2 admin
+commands are provided:
+    
+    sync_seo_models :: initializes the seo metadata info and initializes its
+        with the default value for each of the languages declared in settings.
+
+    reset_seo_models :: resets the SEO info that has not been manually modified
+        into its current default value.
+
 
 ## SEO Output
 

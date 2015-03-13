@@ -4,17 +4,27 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-FALLBACK_TITLE = getattr(settings, 'SEO_DEFAULT_TITLE', None)
-FALLBACK_DESCRIPTION = getattr(settings, 'SEO_DEFAULT_DESCRIPTION', None)
+DEFAULT_LANG_CODE = getattr(settings, 'LANGUAGE_CODE', 'en')[:2]
+
+FALLBACK_TITLE = getattr(settings, 'SEO_DEFAULT_TITLES', None)
+if isinstance(FALLBACK_TITLE, str):
+    FALLBACK_TITLE = {
+        DEFAULT_LANG_CODE: FALLBACK_TITLE,
+    }
+
+FALLBACK_DESCRIPTION = getattr(settings, 'SEO_DEFAULT_DESCRIPTIONS', None)
+if isinstance(FALLBACK_DESCRIPTION, str):
+    FALLBACK_DESCRIPTION = {
+        DEFAULT_LANG_CODE: FALLBACK_DESCRIPTION,
+    }
 
 if FALLBACK_TITLE is None:
-    raise ImproperlyConfigured('SEO_DEFAULT_TITLE is not defined in settings.')
+    raise ImproperlyConfigured('SEO_DEFAULT_TITLES is not defined in settings.')
 
 if FALLBACK_DESCRIPTION is None:
-    raise ImproperlyConfigured('SEO_DEFAULT_DESCRIPTION is not defined in settings.')
+    raise ImproperlyConfigured('SEO_DEFAULT_DESCRIPTIONS is not defined in settings.')
 
 I18N = getattr(settings, 'USE_I18N')
-DEFAULT_LANG_CODE = getattr(settings, 'LANGUAGE_CODE', 'en')[:2]
 
 if I18N:
     SEO_LANGUAGES = getattr(settings, 'LANGUAGES', None)

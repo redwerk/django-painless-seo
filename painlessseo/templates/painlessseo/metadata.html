@@ -1,5 +1,13 @@
 {% load seo %}
-<title>{{title}}</title>
-{% with description|single_quotes as safer_description %}
+
+{% capture_as seo_title %}
+	{% block title %}{% if title %}{{ title }}{% endif %}{% endblock title %}
+{% endcapture_as %}
+{% capture_as seo_description %}
+	{% block description %}{% if description %}{{ description }}{% endif %}{% endblock description %}
+{% endcapture_as %}
+
+<title>{{ seo_title }}</title>
+{% with seo_description|single_quotes as safer_description %}
 <meta name="description" content="{{safer_description|safe}}">
 {% endwith %}

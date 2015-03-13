@@ -4,14 +4,15 @@
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
-from painlessseo.models import SeoMetadata, register_seo_signals
+from painlessseo.models import SeoMetadata
+from painlessseo.utils import register_seo_signals
 
 
 class SeoMetadataInline(generic.GenericStackedInline):
     model = SeoMetadata
     extra = 0
     max_num = 0
-    exclude = ('path', 'lang_code', )
+    exclude = ('path', 'lang_code', 'is_default')
 
     def has_delete_permission(self, request, obj=None):
         return False

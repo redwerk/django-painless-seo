@@ -46,8 +46,13 @@ class CaptureAsNode(template.Node):
 def get_seo(context, **kwargs):
     path = context['request'].path
     lang_code = get_language()[:2]
-
-    metadata = get_path_metadata(path=path, lang_code=lang_code, request=context['request'])
+    view = context.get('view', None)
+    seo_obj = None
+    if view and hasattr(view, 'get_object'):
+        seo_obj = view.get_object()
+    metadata = get_path_metadata(
+        path=path, lang_code=lang_code,
+        instance=seo_obj)
 
     result = {}
     for item in ['title', 'description']:

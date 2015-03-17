@@ -92,9 +92,6 @@ commands are provided:
     sync_seo_models :: initializes the seo metadata info and initializes its
         with the default value for each of the languages declared in settings.
 
-    reset_seo_models :: resets the SEO info that has not been manually modified
-        into its current default value.
-
 
 ## SEO Output
 

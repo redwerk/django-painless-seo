@@ -7,7 +7,7 @@
 	{% block description %}{% if description %}{{ description }}{% endif %}{% endblock description %}
 {% endcapture_as %}
 
-<title>{{ seo_title }}</title>
+<title>{{ seo_title|truncatechars:65 }}</title>
 {% with seo_description|single_quotes as safer_description %}
-<meta name="description" content="{{safer_description|safe}}">
+<meta name="description" content="{{ safer_description|safe|truncatechars:155 }}">
 {% endwith %}

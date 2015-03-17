@@ -1,4 +1,2 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
-
-# TODO
+from django.utils import unittest

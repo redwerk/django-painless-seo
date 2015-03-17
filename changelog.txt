@@ -17,11 +17,11 @@ Changes (AMongeMoreno):
 
 	- Title and description for registered seo models can include variables taken from the instance.
 	- Title and description variables that have language alternatives must check for them before fallbacking to default one.
+	- Parameters allowed on urls to specify groups of urls. Generic path can now have parameters using {x} wildcard where x is a number. The value matched for these parameters can also be addressed in the same way from the content of the seo info.
 
 
 
 	// TODO
-	- Parameters allowed on urls to specify groups of urls
 	- Cache seo info to optimize
 	- Random generated titles and descriptions.
 	

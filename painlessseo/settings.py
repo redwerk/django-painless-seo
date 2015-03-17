@@ -34,3 +34,5 @@ else:
     SEO_LANGUAGES = ((DEFAULT_LANG_CODE, DEFAULT_LANG_CODE), )
 
 SEO_MODELS = getattr(settings, 'SEO_MODELS', [])
+
+SEO_FIELDS = ['title', 'description']

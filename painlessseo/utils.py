@@ -86,21 +86,29 @@ def format_from_instance(string, instance=None, lang_code=None):
         if matches:
             for match in matches:
                 # For each field, check if exists the one for the language
-                field_lang = "%s_%s" % (match, lang_code)
-                if hasattr(instance, field_lang):
-                    result = re.sub(
-                        r"\{\s*%s\s*\}" % match,
-                        unicode(getattr(instance, field_lang)),
-                        result)
-                elif hasattr(instance, match):
-                    result = re.sub(
-                        r"\{\s*%s\s*\}" % match,
-                        unicode(getattr(instance, match)),
-                        result)
-                else:
-                    raise ValueError(
-                        "Model %s does not have attribute %s" % (
-                            instance.__class__, match.strip()))
+                attrs = match.split('.')
+                base = instance
+                for attr in attrs:
+                    field_lang = "%s_%s" % (attr, lang_code)
+                    if hasattr(base, field_lang):
+                        attr_name = field_lang
+                    elif hasattr(base, attr):
+                        attr_name = attr
+                    else:
+                        raise ValueError(
+                            "Model %s does not have attribute %s" % (
+                                base.__class__, attr.strip()))
+
+                    attr_value = getattr(base, attr_name)
+                    if hasattr(attr_value, 'get'):
+                        base = attr_value.get()
+                    else:
+                        base = attr_value
+
+                result = re.sub(
+                    r"\{\s*%s\s*\}" % match,
+                    unicode(attr_value),
+                    result)
     return result
 
 
@@ -120,9 +128,8 @@ def get_path_metadata(path, lang_code, instance=None):
     except SeoMetadata.DoesNotExist:
         # SeoMetadata not found, try to find an alternative path
         abstract_seometadatas = SeoMetadata.objects.filter(
-            lang_code=lang_code
-            ).filter(
-            Q(path__icontains="{") | Q(path__icontains="}")).order_by('-path')
+            lang_code=lang_code, has_parameters=True,
+            ).order_by('id')
 
         for abs_seometadata in list(abstract_seometadatas):
             regex_path = re.sub(r'\{\d+\}', r'([\w\d\-]+)', abs_seometadata.path)

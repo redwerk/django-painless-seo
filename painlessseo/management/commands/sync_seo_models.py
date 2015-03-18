@@ -67,7 +67,7 @@ class Command(NoArgsCommand):
                         lang_code=lang_code,
                         )
 
-                    print("   - Lang %s updated.") % (lang_code)
+                    print("   - Lang '%s' updated.") % (lang_code)
                     metadata = get_hardcoded_metadata(model_class, lang_code)
                     seorm.title = metadata['title']
                     seorm.description = metadata['description']

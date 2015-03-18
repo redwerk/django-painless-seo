@@ -2,32 +2,30 @@ Changes (AMongeMoreno):
 
 	// DONE 
 
-	- Created 2 management commands to sync (update all instances of registered models) and 
-	clean (remove all seo paths for instances of registered models)
+	- Created management command to sync (update all instances of registered models)
 	- Extended DEFAULT_SEO_TITLE to DEFAULT_SEO_TITLES to allow specifying a different
 	fallback title for each language (also for DEFAULT_SEO_DESCRIPTION). The fallback language is
 	'en', english if not specified otherwise by LANGUAGE attribute in settings.
 	- DEFAULT_SEO_TITLES and DEFAULT_SEO_DESCRIPTIONS can also be specifyed at model level, allowing
 	to specify a common base title and description for all instances of this model (on each language as well)
-	- Reset SEO (add is_default to the model to indicate if its the default value or something modified)
-
+	- SEO_DEFAULT_XX -> DEFAULT_SEO_XX
+	- Title and description for registered seo models can include variables taken from the instance.
+	- Title and description variables that have language alternatives must check for them before fallbacking to default one.
+	- Allow commands for specific apps
+	- Parameters allowed on urls to specify groups of urls. Generic path can now have parameters using {x} wildcard where x is a number. The value matched for these parameters can also be addressed in the same way from the content of the seo info.
+	- Random generated titles and descriptions (only for seo models default).
 	
 
 	// TO DOC
 
-	- Title and description for registered seo models can include variables taken from the instance.
-	- Title and description variables that have language alternatives must check for them before fallbacking to default one.
-	- Parameters allowed on urls to specify groups of urls. Generic path can now have parameters using {x} wildcard where x is a number. The value matched for these parameters can also be addressed in the same way from the content of the seo info.
-
-
 
 	// TODO
-	- Cache seo info to optimize
-	- Random generated titles and descriptions.
-	
-	- Allow commands for specific apps
-	
 
+	- Parameters on foreign keys.
+	- Cache seo info to optimize
+	
 	- rel alternate languages
 	- Allow including canonical
+	
+
 

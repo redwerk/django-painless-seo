@@ -9,6 +9,7 @@ from painlessseo.models import SeoMetadata, SeoRegisteredModel
 from painlessseo.utils import register_seo_signals
 from django.utils.translation import activate, get_language
 from django.contrib.contenttypes.models import ContentType
+from django import forms
 
 
 class RegisteredSeoModelsFilter(admin.SimpleListFilter):
@@ -79,10 +80,30 @@ class SeoRegisteredModelAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description', ]
 
 
+class AddSeoMetadataForm(forms.ModelForm):
+
+    class Meta:
+        model = SeoMetadata
+        exclude = ('content_type', 'object_id', )
+
+
 class SeoMetadataAdmin(admin.ModelAdmin):
-    list_display = ('path', 'lang_code', )
+    add_form = AddSeoMetadataForm
+    list_display = ('path', 'lang_code', 'has_parameters')
     search_fields = ['path', ]
-    list_filter = ('lang_code', )
+    list_filter = ('lang_code', 'has_parameters', )
+
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Use special form during user creation
+        """
+        defaults = {}
+        if obj is None:
+            defaults.update({
+                'form': self.add_form,
+            })
+        defaults.update(kwargs)
+        return super(SeoMetadataAdmin, self).get_form(request, obj, **defaults)
 
 
 admin.site.register(SeoRegisteredModel, SeoRegisteredModelAdmin)

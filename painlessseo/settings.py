@@ -6,23 +6,23 @@ from django.core.exceptions import ImproperlyConfigured
 
 DEFAULT_LANG_CODE = getattr(settings, 'LANGUAGE_CODE', 'en')[:2]
 
-FALLBACK_TITLE = getattr(settings, 'SEO_DEFAULT_TITLES', None)
+FALLBACK_TITLE = getattr(settings, 'DEFAULT_SEO_TITLES', None)
 if isinstance(FALLBACK_TITLE, str):
     FALLBACK_TITLE = {
         DEFAULT_LANG_CODE: FALLBACK_TITLE,
     }
 
-FALLBACK_DESCRIPTION = getattr(settings, 'SEO_DEFAULT_DESCRIPTIONS', None)
+FALLBACK_DESCRIPTION = getattr(settings, 'DEFAULT_SEO_DESCRIPTIONS', None)
 if isinstance(FALLBACK_DESCRIPTION, str):
     FALLBACK_DESCRIPTION = {
         DEFAULT_LANG_CODE: FALLBACK_DESCRIPTION,
     }
 
 if FALLBACK_TITLE is None:
-    raise ImproperlyConfigured('SEO_DEFAULT_TITLES is not defined in settings.')
+    raise ImproperlyConfigured('DEFAULT_SEO_TITLES is not defined in settings.')
 
 if FALLBACK_DESCRIPTION is None:
-    raise ImproperlyConfigured('SEO_DEFAULT_DESCRIPTIONS is not defined in settings.')
+    raise ImproperlyConfigured('DEFAULT_SEO_DESCRIPTIONS is not defined in settings.')
 
 I18N = getattr(settings, 'USE_I18N')
 

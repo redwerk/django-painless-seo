@@ -15,6 +15,7 @@ from painlessseo.utils import (
     delete_seo, update_seo, get_fallback_metadata
     )
 from painlessseo.models import SeoRegisteredModel
+import hashlib
 
 DEFAULT_CREATE_LANG = []
 DEFAULT_SEO_MODELS = settings.SEO_MODELS
@@ -57,21 +58,21 @@ class Command(NoArgsCommand):
 
             print("Registering %s model in app %s") % (model, app)
             for lang_code, language in languages:
-                seorm = SeoRegisteredModel.objects.filter(
-                    content_type=ctype,
-                    lang_code=lang_code,
-                    )
-                if not seorm.exists():
-                    seorm = SeoRegisteredModel(
+                model_metadata = get_hardcoded_metadata(model_class, lang_code)
+                titles = model_metadata['titles']
+                descriptions = model_metadata['descriptions']
+                max_len = max(len(titles), len(descriptions))
+                for index in range(0, max_len):
+                    title = titles[index % len(titles)]
+                    desc = descriptions[index % len(descriptions)]
+                    seorm, created = SeoRegisteredModel.objects.get_or_create(
                         content_type=ctype,
                         lang_code=lang_code,
+                        title=title,
+                        description=desc,
                         )
-
-                    print("   - Lang '%s' updated.") % (lang_code)
-                    metadata = get_hardcoded_metadata(model_class, lang_code)
-                    seorm.title = metadata['title']
-                    seorm.description = metadata['description']
-                    seorm.save()
+                    if created:
+                        print("   - Lang '%s' updated.") % (lang_code)
 
             if options.get('sync_instances'):
                 print("Updating %s instances in app %s") % (model, app)
@@ -83,25 +84,31 @@ class Command(NoArgsCommand):
 
 
 def get_hardcoded_metadata(cls, lang_code):
-    result = get_fallback_metadata(lang_code)
+    result = {}
     if hasattr(cls, 'DEFAULT_SEO_TITLES'):
-        title = getattr(cls, 'DEFAULT_SEO_TITLES')
-        if isinstance(title, dict):
-            if lang_code in title:
-                title = title[lang_code]
+        titles = getattr(cls, 'DEFAULT_SEO_TITLES')
+        if isinstance(titles, dict):
+            if lang_code in titles:
+                titles = titles[lang_code]
             else:
-                title = title[settings.DEFAULT_LANG_CODE]
+                titles = titles[settings.DEFAULT_LANG_CODE]
 
-        result['title'] = title
+            if not isinstance(titles, list):
+                titles = [titles]
+
+        result['titles'] = titles
 
     if hasattr(cls, 'DEFAULT_SEO_DESCRIPTIONS'):
-        desc = getattr(cls, 'DEFAULT_SEO_DESCRIPTIONS')
-        if isinstance(desc, dict):
-            if lang_code in desc:
-                desc = desc[lang_code]
+        descs = getattr(cls, 'DEFAULT_SEO_DESCRIPTIONS')
+        if isinstance(descs, dict):
+            if lang_code in descs:
+                descs = descs[lang_code]
             else:
-                desc = desc[settings.DEFAULT_LANG_CODE]
+                descs = descs[settings.DEFAULT_LANG_CODE]
 
-        result['description'] = desc
+            if not isinstance(descs, list):
+                descs = [descs]
+
+        result['descriptions'] = descs
 
     return result

@@ -47,12 +47,26 @@ def get_seo(context, **kwargs):
     path = context['request'].path
     lang_code = get_language()[:2]
     view = context.get('view', None)
+    seo_context = {}
     seo_obj = None
-    if view and hasattr(view, 'get_object'):
-        seo_obj = view.get_object()
+
+    if view:
+        # Try to get the instance if exists
+        try:
+            if hasattr(view, 'get_object'):
+                seo_obj = view.get_object()
+        except AttributeError:
+            pass
+
+        # Try to get seo_context
+        seo_context = view.get_context_data()
+        if hasattr(view, 'get_seo_context'):
+            seo_context = view.get_seo_context()
+
     metadata = get_path_metadata(
         path=path, lang_code=lang_code,
-        instance=seo_obj)
+        instance=seo_obj,
+        seo_context=seo_context)
 
     result = {}
     for item in ['title', 'description']:

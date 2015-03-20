@@ -14,18 +14,20 @@ Changes (AMongeMoreno):
 	- Allow commands for specific apps
 	- Parameters allowed on urls to specify groups of urls. Generic path can now have parameters using {x} wildcard where x is a number. The value matched for these parameters can also be addressed in the same way from the content of the seo info.
 	- Random generated titles and descriptions (only for seo models default).
+	- Parameters on foreign keys.
 	
-
 	// TO DOC
 
+	- Multiples title/description hardcoded on default and registered models.
+	- Allow random titles on generic SeoMetadata (need to define how to determine it).
+	- Give access to the whole context (seo_context).
+	- Optional ending '/' character
 
-	// TODO
 
-	- Parameters on foreign keys.
-	- Cache seo info to optimize
+	// TODO	
+	- rel alternate languages.
+	- Allow including canonical.
+
+	- Include South migrations
 	
-	- rel alternate languages
-	- Allow including canonical
-	
-
-
+	- Cache seo info to optimize.

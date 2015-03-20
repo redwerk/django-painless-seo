@@ -19,8 +19,8 @@ class SeoRegisteredModel(models.Model):
                                  default=settings.DEFAULT_LANG_CODE)
 
     # SEO Info
-    title = models.CharField(verbose_name=_('Title'), max_length=65, blank=True, null=True)
-    description = models.CharField(verbose_name=_('Description'), max_length=155, blank=True, null=True)
+    title = models.CharField(verbose_name=_('Title'), max_length=100, blank=True, null=True)
+    description = models.CharField(verbose_name=_('Description'), max_length=200, blank=True, null=True)
 
     class Meta:
         verbose_name = _('SEO Model')
@@ -44,16 +44,15 @@ class SeoMetadata(models.Model):
 
     # SEO Info
     title = models.CharField(
-        verbose_name=_('Title'), max_length=65, blank=False, null=True,
+        verbose_name=_('Title'), max_length=100, blank=False, null=True,
         help_text=_("Here you can make use of the parameters captured in the URL using the same '{X}' notation."))
     description = models.CharField(
-        verbose_name=_('Description'), max_length=155, blank=False, null=True,
+        verbose_name=_('Description'), max_length=200, blank=False, null=True,
         help_text=_("Here you can make use of the parameters captured in the URL using the same '{X}' notation."))
 
     class Meta:
         verbose_name = _('SEO Path Metadata')
         verbose_name_plural = _('SEO Path Metadata')
-        unique_together = (('path', 'lang_code'), )
         ordering = ('path', 'lang_code')
 
     def __unicode__(self):

@@ -10,20 +10,26 @@ from django.core.urlresolvers import resolve
 from painlessseo.models import SeoRegisteredModel
 
 import re
+import hashlib
 
 
-def get_fallback_metadata(lang_code):
-    title = settings.FALLBACK_TITLE
-    description = settings.FALLBACK_DESCRIPTION
+def get_fallback_metadata(lang_code, index=0):
+    titles = settings.FALLBACK_TITLE
+    descriptions = settings.FALLBACK_DESCRIPTION
     lang = lang_code
-    if isinstance(settings.FALLBACK_TITLE, dict):
-        if lang_code not in settings.FALLBACK_TITLE:
+    if isinstance(titles, dict):
+        if lang_code not in titles:
             lang = settings.DEFAULT_LANG_CODE
-        title = settings.FALLBACK_TITLE[lang]
-    if isinstance(settings.FALLBACK_DESCRIPTION, dict):
-        if lang_code not in settings.FALLBACK_DESCRIPTION:
+        title = titles[lang]
+        if isinstance(title, list):
+            title = title[index % len(title)]
+
+    if isinstance(descriptions, dict):
+        if lang_code not in descriptions:
             lang = settings.DEFAULT_LANG_CODE
-        description = settings.FALLBACK_DESCRIPTION[lang]
+        description = descriptions[lang]
+        if isinstance(description, list):
+            description = description[index % len(description)]
 
     return {
         'title': title,
@@ -50,30 +56,35 @@ def get_instance_metadata(instance, lang_code):
                 'description': available_metadata[index].description,
             }
 
-    return get_fallback_metadata(lang_code)
 
-
-def format_metadata(result, instance=None, lang_code=None, path_args=None):
+def format_metadata(result, instance=None, lang_code=None, path_args=[], seo_context={}):
     formatted_metadata = {}
+    path_context = {}
+    for index in range(0, len(path_args)):
+        path_context[str(index)] = path_args[index]
+    seo_context.update(path_context)
     for meta_key, meta_value in result.iteritems():
-        formatted_metadata[meta_key] = format_from_instance(
-            string=format_from_params(string=meta_value, path_args=path_args),
+        # First format using the instance
+        instance_string = format_from_instance(
+            string=meta_value,
             instance=instance,
             lang_code=lang_code)
+        # Then format using the context
+        formatted_metadata[meta_key] = format_from_params(
+            string=instance_string,
+            **seo_context)
 
     return formatted_metadata
 
 
-def format_from_params(string, path_args=None):
+def format_from_params(string, **kwargs):
     # Format using parameters
     result = string
-    if path_args:
-        index = 0
-        for arg in path_args:
-            arg = re.sub('-', ' ', arg).title()
+    if kwargs:
+        for name, value in kwargs.iteritems():
+            value = re.sub('-', ' ', str(value)).title()
             result = re.sub(
-                r'\{\s*%d\s*\}' % (index), arg, result)
-            index += 1
+                r'\{\s*%s\s*\}' % (name), value, result)
 
     return result
 
@@ -88,16 +99,22 @@ def format_from_instance(string, instance=None, lang_code=None):
                 # For each field, check if exists the one for the language
                 attrs = match.split('.')
                 base = instance
+                found = True
                 for attr in attrs:
                     field_lang = "%s_%s" % (attr, lang_code)
                     if hasattr(base, field_lang):
                         attr_name = field_lang
                     elif hasattr(base, attr):
                         attr_name = attr
+                    elif base is None:
+                        # In case is a foreign key with 'None' value
+                        # We can't go deeper, but we found the attr
+                        attr_value = None
+                        break
                     else:
-                        raise ValueError(
-                            "Model %s does not have attribute %s" % (
-                                base.__class__, attr.strip()))
+                        # Attr not found, so let it like it is
+                        found = False
+                        break
 
                     attr_value = getattr(base, attr_name)
                     if hasattr(attr_value, 'get'):
@@ -105,20 +122,22 @@ def format_from_instance(string, instance=None, lang_code=None):
                     else:
                         base = attr_value
 
-                result = re.sub(
-                    r"\{\s*%s\s*\}" % match,
-                    unicode(attr_value),
-                    result)
+                if found:
+                    result = re.sub(
+                        r"\{\s*%s\s*\}" % match,
+                        unicode(attr_value or ''),
+                        result)
     return result
 
 
-def get_path_metadata(path, lang_code, instance=None):
+def get_path_metadata(path, lang_code, instance=None, seo_context={}):
     # By default, fallback to general default
-    result = get_fallback_metadata(lang_code)
+    index = int(hashlib.md5(path).hexdigest(), 16)
+    result = get_fallback_metadata(lang_code, index=index)
 
     # Find correct metadata
     seometadata = None
-    path_args = None
+    path_args = []
 
     try:
         # Try to find exact match
@@ -130,15 +149,23 @@ def get_path_metadata(path, lang_code, instance=None):
         abstract_seometadatas = SeoMetadata.objects.filter(
             lang_code=lang_code, has_parameters=True,
             ).order_by('id')
+        matches = []
 
+        # Collect all metadatas that matches the path
         for abs_seometadata in list(abstract_seometadatas):
             regex_path = re.sub(r'\{\d+\}', r'([\w\d\-]+)', abs_seometadata.path)
-            regex_path = '^' + regex_path + '$'
+            regex_path = '^' + regex_path + '/?$'
             match = re.search(regex_path, path)
             if match:
-                seometadata = abs_seometadata
-                path_args = match.groups()
-                break
+                matches.append({
+                    'seometadata': abs_seometadata,
+                    'groups': match.groups(),
+                    })
+
+        if len(matches) > 0:
+            random_match = matches[index % len(matches)]
+            seometadata = random_match['seometadata']
+            path_args = random_match['groups']
 
     if seometadata:
         # If seometadata found
@@ -149,10 +176,10 @@ def get_path_metadata(path, lang_code, instance=None):
         # No exact nor abstract seo metadata found, prepare default
         if instance:
             # Look for registered model default
-            result = get_instance_metadata(instance, lang_code)
+            result = get_instance_metadata(instance, lang_code) or result
 
     # At this point, result contains the resolved value before formatting.
-    formatted_result = format_metadata(result, instance, lang_code, path_args)
+    formatted_result = format_metadata(result, instance, lang_code, path_args, seo_context)
 
     return formatted_result
 
@@ -164,23 +191,24 @@ def update_seo(sender, instance, auto_languages=[], **kwargs):
         activate(lang_code)
         ctype = ContentType.objects.get_for_model(instance)
 
-        try:
-            sm = SeoMetadata.objects.get(
-                content_type=ctype,
-                object_id=instance.id,
-                lang_code=lang_code)
+        sms = SeoMetadata.objects.filter(
+            content_type=ctype,
+            object_id=instance.id,
+            lang_code=lang_code)
 
+        if sms.exists():
             # If it exists, update path
             absolute_url = instance.get_absolute_url()
-            if absolute_url and absolute_url != sm.path:
-                sm.path = absolute_url
-                sm.save()
-
-        except SeoMetadata.DoesNotExist:
+            for sm in sms.all():
+                if absolute_url and absolute_url != sm.path:
+                    sm.path = absolute_url
+                    sm.save()
+        else:
             # If it does not exists, only create if it is from sync command
             if lang_code in auto_languages:
                 absolute_url = instance.get_absolute_url()
-                metadata = get_instance_metadata(instance, lang_code)
+                metadata = get_fallback_metadata(lang_code)
+                metadata = get_instance_metadata(instance, lang_code) or metadata
                 if absolute_url:
                     sm = SeoMetadata(
                         content_type=ctype,

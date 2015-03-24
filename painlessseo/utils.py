@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from painlessseo import settings
 from painlessseo.models import SeoMetadata
 from django.core.exceptions import ImproperlyConfigured
@@ -8,6 +9,7 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.core.urlresolvers import resolve
 from painlessseo.models import SeoRegisteredModel
+from django.utils.encoding import smart_text
 
 import re
 import hashlib
@@ -82,7 +84,7 @@ def format_from_params(string, **kwargs):
     result = string
     if kwargs:
         for name, value in kwargs.iteritems():
-            value = re.sub('-', ' ', str(value)).title()
+            value = re.sub('-', ' ', smart_text(value)).title()
             result = re.sub(
                 r'\{\s*%s\s*\}' % (name), value, result)
 

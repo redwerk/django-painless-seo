@@ -59,7 +59,12 @@ def get_seo(context, **kwargs):
             pass
 
         # Try to get seo_context
-        seo_context = view.get_context_data()
+        try:
+            if hasattr(view, 'get_context_data'):
+                seo_context.update(view.get_context_data())
+        except Exception:
+            pass
+
         if hasattr(view, 'get_seo_context'):
             seo_context = view.get_seo_context()
 

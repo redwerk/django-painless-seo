@@ -23,13 +23,15 @@ Changes (AMongeMoreno):
 	- Give access to the whole context (seo_context).
 	- Optional ending '/' character
 
+	// DOING 
+
+	- add extra metadata 
 
 	// TODO
-	- add extra metadata 
+
 	- rel alternate languages.
 	- Allow including canonical.
 
-	- Fix bugs (lang_code bug)
 	- Add better admin (with default lang to compare)
 
 	- Include South migrations

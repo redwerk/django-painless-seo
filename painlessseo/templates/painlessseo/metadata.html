@@ -1,7 +1,7 @@
 {% load seo %}
 
 {% capture_as seo_title %}
-	{% block title %}{% if title %}{{ title }}{% endif %}{% endblock title %}
+	{% block title %}{% if title %}{{ title|safe }}{% endif %}{% endblock title %}
 {% endcapture_as %}
 {% capture_as seo_description %}
 	{% block description %}{% if description %}{{ description }}{% endif %}{% endblock description %}

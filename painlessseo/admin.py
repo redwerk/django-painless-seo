@@ -55,7 +55,7 @@ class SeoMetadataInlineFormSet(generic.BaseGenericInlineFormSet):
 
                     if equal_lang.exists():
                         raise exceptions.ValidationError(
-                            'Already exists a SEO Metadata for this object and language %s.' % lang_code)
+                            'Already exists a SEO Metadata for this object and language %s.' % data["lang_code"])
 
                 # Compute path and update if neccessary
                 active_language = get_language()

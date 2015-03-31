@@ -15,7 +15,8 @@ Changes (AMongeMoreno):
 	- Parameters allowed on urls to specify groups of urls. Generic path can now have parameters using {x} wildcard where x is a number. The value matched for these parameters can also be addressed in the same way from the content of the seo info.
 	- Random generated titles and descriptions (only for seo models default).
 	- Parameters on foreign keys.
-	
+	- fix smart_text
+
 	// TO DOC
 
 	- Multiples title/description hardcoded on default and registered models.
@@ -25,10 +26,10 @@ Changes (AMongeMoreno):
 
 	// DOING 
 
-	- add extra metadata 
 
 	// TODO
 
+	- add extra metadata 
 	- rel alternate languages.
 	- Allow including canonical.
 

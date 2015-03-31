@@ -36,7 +36,7 @@ setup(
     url='https://github.com/Glamping-Hub/django-painless-seo',
     license='BSD',
     classifiers=[
-        'Development Status :: 1.1 - Beta',
+        'Development Status :: 0.1.2 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',

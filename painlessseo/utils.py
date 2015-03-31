@@ -134,7 +134,7 @@ def format_from_instance(string, instance=None, lang_code=None):
 
 def get_path_metadata(path, lang_code, instance=None, seo_context={}):
     # By default, fallback to general default
-    index = int(hashlib.md5(path).hexdigest(), 16)
+    index = int(hashlib.md5(smart_text(path)).hexdigest(), 16)
     result = get_fallback_metadata(lang_code, index=index)
 
     # Find correct metadata

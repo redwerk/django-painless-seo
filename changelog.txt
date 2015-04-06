@@ -28,6 +28,7 @@ Changes (AMongeMoreno):
 
 
 	// TODO
+	- Add escape html tags.
 
 	- add extra metadata 
 	- rel alternate languages.

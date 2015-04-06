@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.core.urlresolvers import resolve
 from painlessseo.models import SeoRegisteredModel
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text, smart_str
 
 import re
 import hashlib
@@ -134,7 +134,7 @@ def format_from_instance(string, instance=None, lang_code=None):
 
 def get_path_metadata(path, lang_code, instance=None, seo_context={}):
     # By default, fallback to general default
-    index = int(hashlib.md5(smart_text(path)).hexdigest(), 16)
+    index = int(hashlib.md5(smart_str(path)).hexdigest(), 16)
     result = get_fallback_metadata(lang_code, index=index)
 
     # Find correct metadata

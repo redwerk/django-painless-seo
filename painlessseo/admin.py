@@ -27,9 +27,9 @@ class RegisteredSeoModelsFilter(admin.SimpleListFilter):
 
         res = []
         models = SeoRegisteredModel.objects.values(
-            'content_type__id', 'content_type__name').distinct()
+            'content_type__id', 'content_type__model').distinct()
         for seomodel in list(models):
-            res.append((seomodel['content_type__id'], seomodel['content_type__name']))
+            res.append((seomodel['content_type__id'], seomodel['content_type__model']))
         return res
 
     def queryset(self, request, queryset):
